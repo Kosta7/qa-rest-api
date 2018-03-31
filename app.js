@@ -10,6 +10,35 @@ const logger = require("morgan");
 app.use(jsonParser());
 app.use(logger("dev"));
 
+const mongoose = require("mongoose");
+
+mongoose.connect("mongodb://localhost:27017/qa");
+
+const db = mongoose.connection;
+
+db.on("error", err => {
+  console.error("connection error:", err);
+});
+
+db.once("open", () => {});
+
+// set up all this api to be used by a browser
+// (but it works only in development, not in production)
+// (learn about CORS to make it work in production as well)
+// (also learn about user authentication and user authorization)
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
+  if (req.method === "OPTIONS") {
+    res.header("Access-Control-Allow-Methods", "PUT,POST,DELETE");
+    return res.status(200).json({});
+  }
+  next();
+});
+
 app.use("/questions", routes);
 
 // catch 404 and forward to error handler
